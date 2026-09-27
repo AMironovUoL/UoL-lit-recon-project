@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Literary Reconciliation Service</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #f9f9f7;
+      --surface:   #ffffff;
+      --border:    #e2e2de;
+      --text:      #1a1a18;
+      --muted:     #6b6b67;
+      --accent:    #2a5f5f;
+      --accent-lt: #e8f2f2;
+      --match:     #1a5c38;
+      --match-bg:  #eaf4ee;
+      --warn:      #7a4a10;
+      --warn-bg:   #fdf3e3;
+      --radius:    6px;
+      --mono:      "SF Mono", "Fira Mono", "Consolas", monospace;
+    }
+
+    body {
+      font-family: "Georgia", serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /*  Header  */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 2rem 2.5rem 1.5rem;
+      background: var(--surface);
+    }
+
+    header h1 {
+      font-size: 1.25rem;
+      font-weight: normal;
+      letter-spacing: 0.01em;
+      color: var(--text);
+    }
+
+    header h1 span {
+      color: var(--accent);
+      font-style: italic;
+    }
+
+    header p {
+      margin-top: 0.35rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-family: sans-serif;
+    }
+
+    /*  Main layout  */
+    main {
+      flex: 1;
+      max-width: 720px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem;
+    }
+
+    /*  Search form  */
+    .search-form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 0.65rem 0.9rem;
+      font-size: 1rem;
+      font-family: "Georgia", serif;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--accent);
+    }
+
+    input[type="text"]::placeholder {
+      color: var(--muted);
+    }
+
+    button[type="submit"] {
+      padding: 0.65rem 1.25rem;
+      font-size: 0.9rem;
+      font-family: sans-serif;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity 0.15s;
+    }
+
+    button[type="submit"]:hover { opacity: 0.85; }
+    button[type="submit"]:disabled { opacity: 0.5; cursor: default; }
+
+    .switch-btn {
+      margin-top: 0.5rem;
+      padding: 0.4rem 1rem;
+      font-size: 0.85rem;
+      font-family: sans-serif;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+
+    .switch-btn:hover { opacity: 0.85; }
+
+    /*  Type toggle  */
+    .type-toggle {
+      display: flex;
+      gap: 0.4rem;
+    }
+
+    .type-toggle label {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.85rem;
+      font-family: sans-serif;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 0.3rem 0.7rem;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--surface);
+      transition: all 0.15s;
+      user-select: none;
+    }
+
+    .type-toggle input[type="radio"] { display: none; }
+
+    .type-toggle input[type="radio"]:checked + span {
+      /* handled via JS class below */
+    }
+
+    .type-toggle label.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-lt);
+    }
+
+    /*  Status line  */
+    .status {
+      font-size: 0.8rem;
+      font-family: sans-serif;
+      color: var(--muted);
+      min-height: 1.2rem;
+      margin-bottom: 1rem;
+    }
+
+    /*  Results  */
+    .results { display: flex; flex-direction: column; gap: 0.75rem; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 1px 6px rgba(42,95,95,0.08);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      padding: 0.9rem 1.1rem 0.7rem;
+      gap: 1rem;
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: normal;
+      flex: 1;
+    }
+
+    .card-explanation {
+      font-size: 11px;
+      font-family: sans-serif;
+      color: var(--teal);
+      padding: 0 1.1rem 0.5rem;
+      font-style: normal;
+  }
+
+    .card-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }
+
+    .score {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      padding: 0.15rem 0.45rem;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+
+    .score-high {
+      background: var(--match-bg);
+      color: var(--match);
+    }
+
+    .score-mid {
+      background: var(--warn-bg);
+      color: var(--warn);
+    }
+
+    .score-low {
+      background: #f2f2f0;
+      color: var(--muted);
+    }
+
+    .match-badge {
+      font-size: 0.72rem;
+      font-family: sans-serif;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--match);
+    }
+
+    .card-detail {
+      display: none;
+      padding: 0 1.1rem 0.9rem;
+      border-top: 1px solid var(--border);
+      margin-top: 0.1rem;
+    }
+
+    .card.open .card-detail { display: block; }
+
+    .detail-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+      font-size: 0.83rem;
+      font-family: sans-serif;
+    }
+
+    .detail-label {
+      color: var(--muted);
+      min-width: 80px;
+      flex-shrink: 0;
+    }
+
+    .detail-value {
+      color: var(--text);
+      font-family: var(--mono);
+      word-break: break-all;
+    }
+
+    .ol-link {
+      display: inline-block;
+      margin-top: 0.7rem;
+      font-size: 0.82rem;
+      font-family: sans-serif;
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid var(--accent-lt);
+      transition: border-color 0.15s;
+    }
+
+    .ol-link:hover { border-color: var(--accent); }
+
+    .ol-face-link {
+      font-size: 13px;
+      color: var(--accent);
+      text-decoration: none;
+      opacity: 0.7;
+      transition: opacity 0.15s;
+      flex-shrink: 0;
+    }
+
+    .ol-face-link:hover { opacity: 1; }
+
+    /*  Empty / error states  */
+    .empty {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--muted);
+      font-family: sans-serif;
+      font-size: 0.9rem;
+    }
+
+    .empty strong {
+      display: block;
+      font-size: 1rem;
+      color: var(--text);
+      margin-bottom: 0.4rem;
+      font-family: "Georgia", serif;
+      font-weight: normal;
+    }
+
+    .mode-toggle {
+      display: flex;
+      gap: 0.4rem;
+      margin-bottom: 1rem;
+    }
+
+    .mode-btn {
+        padding: 0.35rem 1rem;
+        font-size: 0.85rem;
+        font-family: sans-serif;
+        background: var(--surface);
+        color: var(--muted);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        cursor: pointer;
+        transition: all 0.15s;
+    }
+
+    .mode-btn.active {
+        background: var(--accent);
+        color: white;
+        border-color: var(--accent);
+    }
+
+    #batchInput {
+        width: 100%;
+        padding: 0.65rem 0.9rem;
+        font-size: 0.95rem;
+        font-family: "Georgia", serif;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--surface);
+        color: var(--text);
+        resize: vertical;
+        margin-bottom: 0.75rem;
+    }
+
+    #batchInput:focus {
+        outline: none;
+        border-color: var(--accent);
+    }
+
+    .batch-run-btn {
+        padding: 0.65rem 1.25rem;
+        font-size: 0.9rem;
+        font-family: sans-serif;
+        background: var(--accent);
+        color: white;
+        border: none;
+        border-radius: var(--radius);
+        cursor: pointer;
+        margin-top: 0.75rem;
+        transition: opacity 0.15s;
+    }
+
+    .batch-run-btn:hover { opacity: 0.85; }
+    .batch-run-btn:disabled { opacity: 0.5; cursor: default; }
+
+    .batch-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+        font-family: sans-serif;
+        margin-top: 1.5rem;
+    }
+
+    .batch-table th {
+        background: var(--navy, #1A2744);
+        color: white;
+        padding: 8px 10px;
+        text-align: left;
+        font-weight: 500;
+    }
+
+    .batch-table td {
+        padding: 6px 10px;
+        border-bottom: 0.5px solid var(--border);
+        vertical-align: middle;
+    }
+
+    .batch-table tr:nth-child(odd) td { background: var(--offW, #F8FAFC); }
+    .batch-table tr:nth-child(even) td { background: white; }
+
+    .batch-table tr.rank-1 td:first-child {
+        border-left: 3px solid var(--teal, #0D9488);
+    }
+
+    .decision-auto { color: #166534; font-weight: 600; }
+    .decision-review { color: #92400E; }
+    .decision-low { color: var(--muted); }
+
+    .export-btn {
+        margin-top: 1rem;
+        padding: 0.4rem 1rem;
+        font-size: 0.85rem;
+        font-family: sans-serif;
+        background: var(--surface);
+        color: var(--accent);
+        border: 1px solid var(--accent);
+        border-radius: var(--radius);
+        cursor: pointer;
+        transition: all 0.15s;
+    }
+
+    .export-btn:hover {
+        background: var(--accent);
+        color: white;
+    }
+
+    /*  Footer  */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 1rem 2.5rem;
+      font-size: 0.78rem;
+      font-family: sans-serif;
+      color: var(--muted);
+      background: var(--surface);
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Literary <span>Reconciliation</span> Service</h1>
+  <p>Match author names and book titles against Open Library data</p>
+</header>
+
+<main>
+  <div class="mode-toggle" id="modeToggle">
+    <button class="mode-btn active" id="btnSingle" onclick="switchMode('single')">Single</button>
+    <button class="mode-btn" id="btnBatch" onclick="switchMode('batch')">Batch</button>
+  </div>
+  <form class="search-form" id="searchForm" autocomplete="off">
+    <div class="input-row">
+      <input
+        type="text"
+        id="query"
+        placeholder="Enter an author name or book title…"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <button type="submit" id="searchBtn">Search</button>
+    </div>
+    <div class="type-toggle" id="typeToggle">
+      <label class="active" id="lbl-author">
+        <input type="radio" name="type" value="Person" checked />
+        <span>Author</span>
+      </label>
+      <label id="lbl-book">
+        <input type="radio" name="type" value="Book" />
+        <span>Book</span>
+      </label>
+    </div>
+  </form>
+  <div id="batchSection" style="display:none;">
+    <textarea 
+        id="batchInput" 
+        placeholder="Enter one name or title per line..."
+        rows="8"
+    ></textarea>
+    <div class="type-toggle" id="batchTypeToggle">
+        <label class="active" id="blbl-author">
+            <input type="radio" name="batchType" value="Person" checked />
+            <span>Author</span>
+        </label>
+        <label id="blbl-book">
+            <input type="radio" name="batchType" value="Book" />
+            <span>Book</span>
+        </label>
+    </div>
+    <button class="batch-run-btn" id="batchBtn" onclick="runBatch()">Reconcile all</button>
+</div>
+
+  <div class="status" id="status"></div>
+  <div class="results" id="results"></div>
+
+  <div id="batchResults" style="display:none;">
+    <table class="batch-table">
+        <thead>
+            <tr>
+                <th>Query</th>
+                <th>Rank</th>
+                <th>Match</th>
+                <th>Score</th>
+                <th>Decision</th>
+                <th>Via</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody id="batchTableBody"></tbody>
+    </table>
+    <button class="export-btn" onclick="exportCSV()">Export CSV</button>
+  </div>
+
+</main>
+<footer>
+  Data from <a href="https://openlibrary.org" target="_blank">Open Library</a> &nbsp;·&nbsp;
+  OpenRefine endpoint: <code>http://127.0.0.1:5001/reconcile</code>
+</footer>
+
+<script>
+  const form      = document.getElementById("searchForm");
+  const queryEl   = document.getElementById("query");
+  const statusEl  = document.getElementById("status");
+  const resultsEl = document.getElementById("results");
+  const searchBtn = document.getElementById("searchBtn");
+  const typeToggle = document.getElementById("typeToggle");
+
+  //  Type toggle active state 
+  typeToggle.querySelectorAll("label").forEach(label => {
+    label.addEventListener("click", () => {
+      typeToggle.querySelectorAll("label").forEach(l => l.classList.remove("active"));
+      label.classList.add("active");
+    });
+  });
+
+  // Batch type toggle active state
+  document.getElementById('batchTypeToggle').querySelectorAll('label').forEach(label => {
+      label.addEventListener('click', () => {
+          document.getElementById('batchTypeToggle').querySelectorAll('label').forEach(l => l.classList.remove('active'));
+          label.classList.add('active');
+      });
+  });
+
+  //  Score styling 
+  function scoreClass(score) {
+    if (score >= 95) return "score-high";
+    if (score >= 70) return "score-mid";
+    return "score-low";
+  }
+
+  //  Render results 
+  function renderResults(results, query, type) {
+    resultsEl.innerHTML = "";
+
+    if (!results.length) {
+      const otherType = type === "Person" ? "Book" : "Person";
+      const otherLabel = type === "Person" ? "Book" : "Author";
+      const currentLabel = type === "Person" ? "Author" : "Book";
+
+      resultsEl.innerHTML = `
+          <div class="empty">
+              <strong>No ${currentLabel} matches found for "${query}"</strong>
+              Try a different spelling, or search as a ${otherLabel} instead.
+              <br><br>
+              <button class="switch-btn" onclick="switchAndSearch('${query}', '${otherType}')">
+                  Search as ${otherLabel}
+              </button>
+          </div>`;
+      return;
+    }
+
+    results.forEach((r, i) => {
+      const scoreVal  = Math.round(r.score);
+      const sClass    = scoreClass(r.score);
+      const isMatch   = r.match;
+      const olBase    = r.type[0].id === "Person"
+                          ? "https://openlibrary.org/authors/"
+                          : "https://openlibrary.org/works/";
+      const olKey     = r.id.split("/").pop();
+      const olUrl     = olBase + olKey;
+      const typeLabel = r.type[0].name;
+
+      const card = document.createElement("div");
+      card.className = "card";
+      // Build match explanation
+      let explanation = "";
+      if (r.match_via === "titleVariant") {
+          const lang = r.variant_language ? r.variant_language.toUpperCase() : "";
+          explanation = `Matched via ${lang} title variant: <em>${r.matched_variant}</em>`;
+      } else if (r.match_via === "hasHeteronym") {
+          explanation = `Matched via heteronym: <em>${r.matched_name}</em>`;
+      } else if (r.match_via === "hasSemiHeteronym") {
+          explanation = `Matched via semi-heteronym: <em>${r.matched_name}</em>`;
+      } else if (r.match_via === "isPenNameOf") {
+          explanation = `Matched via pen name: <em>${r.matched_name}</em>`;
+      } else if (r.match_via === "hasDisputedIdentity") {
+          explanation = `Disputed identity — confidence: ${r.confidence} — candidate: <em>${r.matched_name}</em>`;
+      }
+      card.innerHTML = `
+        <div class="card-header">
+          <div class="card-title">${r.name}</div>
+          ${explanation ? `<div class="card-explanation">${explanation}</div>` : ""}
+
+          <div class="card-meta">
+            ${isMatch ? '<span class="match-badge">Match</span>' : ""}
+            <span class="score ${sClass}">${scoreVal}</span>
+            <a class="ol-face-link" href="${olUrl}" target="_blank" title="View on Open Library">↗</a>
+          </div>
+        </div>
+        <div class="card-detail">
+          <div class="detail-row">
+            <span class="detail-label">Type</span>
+            <span class="detail-value">${typeLabel}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">ID</span>
+            <span class="detail-value">${r.id}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Score</span>
+            <span class="detail-value">${r.score.toFixed(2)}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Auto-match</span>
+            <span class="detail-value">${isMatch ? "Yes (score ≥ 95)" : "No — review recommended"}</span>
+          </div>
+          <a class="ol-link" href="${olUrl}" target="_blank">
+            View on Open Library
+          </a>
+        </div>`;
+
+      card.querySelector(".card-header").addEventListener("click", () => {
+        card.classList.toggle("open");
+      });
+
+      resultsEl.appendChild(card);
+    });
+  }
+
+  //  Search 
+  async function doSearch(q, type) {
+    statusEl.textContent = "Searching…";
+    searchBtn.disabled = true;
+    resultsEl.innerHTML = "";
+
+    try {
+      const res  = await fetch(`/search?q=${encodeURIComponent(q)}&type=${type}`);
+      const data = await res.json();
+      const results = data.results || [];
+
+      const topScore = results[0]?.score ?? 0;
+      const matched  = results.filter(r => r.match).length;
+
+      statusEl.textContent = results.length
+        ? `${results.length} candidate${results.length > 1 ? "s" : ""} · ${matched} auto-matched`
+        : "";
+
+      renderResults(results, q, type);
+    } catch (err) {
+      statusEl.textContent = "Could not reach the service.";
+      resultsEl.innerHTML = `
+        <div class="empty">
+          <strong>Connection error</strong>
+          Make sure app.py is running on port 5001.
+        </div>`;
+    } finally {
+      searchBtn.disabled = false;
+    }
+  }
+
+  form.addEventListener("submit", e => {
+    e.preventDefault();
+    const q    = queryEl.value.trim();
+    const type = document.querySelector('input[name="type"]:checked').value;
+    if (q) doSearch(q, type);
+  });
+
+  function switchAndSearch(q, type) {
+    // switch the type toggle
+    document.querySelectorAll('input[name="type"]').forEach(radio => {
+        radio.checked = radio.value === type;
+    });
+    document.querySelectorAll('.type-toggle label').forEach(label => {
+        label.classList.remove('active');
+    });
+    const activeLabel = document.querySelector(`input[name="type"][value="${type}"]`).parentElement;
+    activeLabel.classList.add('active');
+
+    // run the search
+    queryEl.value = q;
+    doSearch(q, type);
+}
+
+function switchMode(mode) {
+    const singleSection = document.getElementById('searchForm');
+    const batchSection = document.getElementById('batchSection');
+    const batchResults = document.getElementById('batchResults');
+    const btnSingle = document.getElementById('btnSingle');
+    const btnBatch = document.getElementById('btnBatch');
+    const statusEl = document.getElementById('status');
+    const resultsEl = document.getElementById('results');
+
+    if (mode === 'single') {
+        singleSection.style.display = '';
+        batchSection.style.display = 'none';
+        batchResults.style.display = 'none';
+        btnSingle.classList.add('active');
+        btnBatch.classList.remove('active');
+        statusEl.style.display = '';
+        resultsEl.style.display = '';
+    } else {
+        singleSection.style.display = 'none';
+        batchSection.style.display = '';
+        batchResults.style.display = 'none';
+        btnSingle.classList.remove('active');
+        btnBatch.classList.add('active');
+        statusEl.style.display = 'none';
+        resultsEl.style.display = 'none';
+    }
+}
+
+async function runBatch() {
+    const input = document.getElementById('batchInput').value.trim();
+    if (!input) return;
+
+    const queries = input.split('\n').map(q => q.trim()).filter(q => q.length > 0);
+    const type = document.querySelector('input[name="batchType"]:checked').value;
+    const btn = document.getElementById('batchBtn');
+    const tbody = document.getElementById('batchTableBody');
+    const batchResults = document.getElementById('batchResults');
+
+    btn.disabled = true;
+    btn.textContent = `Reconciling 0 / ${queries.length}...`;
+    tbody.innerHTML = '';
+    batchResults.style.display = 'block';
+
+    for (let i = 0; i < queries.length; i++) {
+        const q = queries[i];
+        btn.textContent = `Reconciling ${i + 1} / ${queries.length}...`;
+
+        try {
+            const res = await fetch(`/search?q=${encodeURIComponent(q)}&type=${type}`);
+            const data = await res.json();
+            const results = (data.results || []).slice(0, 3);
+
+            if (results.length === 0) {
+                const row = document.createElement('tr');
+                row.className = 'rank-1';
+                row.innerHTML = `
+                    <td>${q}</td>
+                    <td>—</td>
+                    <td><em>No results</em></td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td>—</td>`;
+                tbody.appendChild(row);
+            } else {
+                results.forEach((r, idx) => {
+                    const score = Math.round(r.score * 10) / 10;
+                    const isAuto = r.match;
+                    const decisionClass = isAuto ? 'decision-auto' : score >= 70 ? 'decision-review' : 'decision-low';
+                    const decisionLabel = isAuto ? 'Auto' : score >= 70 ? 'Review' : 'Low';
+                    const via = r.match_via ? r.match_via.replace('has', '').replace('is', '').replace('PenNameOf', 'pen name').replace('Heteronym', 'heteronym').replace('SemiHeteronym', 'semi-heteronym').replace('DisputedIdentity', `disputed (${r.confidence})`).replace('titleVariant', `${r.variant_language} variant`) : '—';
+                    const olBase = r.type[0].id === "Person" ? "https://openlibrary.org/authors/" : "https://openlibrary.org/works/";
+                    const olKey = r.id.split("/").pop();
+                    const olUrl = olBase + olKey;
+
+                    const row = document.createElement('tr');
+                    if (idx === 0) row.className = 'rank-1';
+                    row.innerHTML = `
+                        <td>${idx === 0 ? q : ''}</td>
+                        <td>${idx + 1}</td>
+                        <td>${r.name}</td>
+                        <td>${score}</td>
+                        <td class="${decisionClass}">${decisionLabel}</td>
+                        <td>${via}</td>
+                        <td><a href="${olUrl}" target="_blank">↗</a></td>`;
+                    tbody.appendChild(row);
+                });
+            }
+        } catch (err) {
+            const row = document.createElement('tr');
+            row.className = 'rank-1';
+            row.innerHTML = `
+                <td>${q}</td>
+                <td colspan="6"><em>Error</em></td>`;
+            tbody.appendChild(row);
+        }
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Reconcile all';
+}
+
+// Store batch results for CSV export
+let batchData = [];
+
+async function exportCSV() {
+    const tbody = document.getElementById('batchTableBody');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    
+    const csvLines = ['Query,Rank,Match,Score,Decision,Via,OpenLibrary URL'];
+    
+    rows.forEach(row => {
+        const cells = Array.from(row.querySelectorAll('td'));
+        if (cells.length >= 6) {
+            const link = cells[6]?.querySelector('a');
+            const url = link ? link.href : '';
+            const values = [
+                cells[0].textContent,
+                cells[1].textContent,
+                cells[2].textContent,
+                cells[3].textContent,
+                cells[4].textContent,
+                cells[5].textContent,
+                url
+            ].map(v => `"${v.replace(/"/g, '""')}"`);
+            csvLines.push(values.join(','));
+        }
+    });
+
+    const blob = new Blob([csvLines.join('\n')], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'reconciliation_results.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+
+</script>
+</body>
+</html>

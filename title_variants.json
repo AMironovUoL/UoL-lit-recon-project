@@ -1,0 +1,55 @@
+{
+  "variants": [
+    {
+      "canonical_key": "/works/OL166894W",
+      "canonical_title": "Prestupleniye i nakazaniye",
+      "variants": [
+        {"title": "Crime and Punishment", "language": "en"},
+        {"title": "Schuld und Sühne", "language": "de"},
+        {"title": "Crime et châtiment", "language": "fr"},
+        {"title": "Delitto e castigo", "language": "it"},
+        {"title": "Crimen y castigo", "language": "es"}
+      ]
+    },
+    {
+      "canonical_key": "/works/OL498463W",
+      "canonical_title": "Der Proceß",
+      "variants": [
+        {"title": "The Trial", "language": "en"},
+        {"title": "Le Procès", "language": "fr"},
+        {"title": "Il processo", "language": "it"},
+        {"title": "El proceso", "language": "es"}
+      ]
+    },
+    {
+      "canonical_key": "/works/OL274505W",
+      "canonical_title": "Cien años de soledad",
+      "variants": [
+        {"title": "One Hundred Years of Solitude", "language": "en"},
+        {"title": "Cent ans de solitude", "language": "fr"},
+        {"title": "Hundert Jahre Einsamkeit", "language": "de"},
+        {"title": "Cent'anni di solitudine", "language": "it"}
+      ]
+    },
+    {
+      "canonical_key": "/works/OL1161171W",
+      "canonical_title": "La Nausée",
+      "variants": [
+        {"title": "Nausea", "language": "en"},
+        {"title": "Der Ekel", "language": "de"},
+        {"title": "La náusea", "language": "es"},
+        {"title": "La nausea", "language": "it"}
+      ]
+    },
+    {
+      "canonical_key": "/works/OL67334W",
+      "canonical_title": "Die Blechtrommel",
+      "variants": [
+        {"title": "The Tin Drum", "language": "en"},
+        {"title": "Le Tambour", "language": "fr"},
+        {"title": "Il tamburo di latta", "language": "it"},
+        {"title": "El tambor de hojalata", "language": "es"}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "relationships": [
+    {
+      "from_key": "/authors/OL24528A",
+      "from_name": "George Eliot",
+      "relationship": "isPenNameOf",
+      "to_name": "Mary Ann Evans",
+      "confidence": 1.0,
+      "note": "Pen name adopted to be taken seriously as a novelist in the 1850s"
+    },
+    {
+      "from_key": "/authors/OL32293A",
+      "from_name": "Voltaire",
+      "relationship": "isPenNameOf",
+      "to_name": "François-Marie Arouet",
+      "confidence": 1.0,
+      "note": "Pen name adopted in 1718"
+    },
+    {
+      "from_key": "/authors/OL2786936A",
+      "from_name": "Stendhal",
+      "relationship": "isPenNameOf",
+      "to_name": "Marie-Henri Beyle",
+      "confidence": 1.0,
+      "note": "One of 187 pseudonyms used during his lifetime"
+    },
+    {
+      "from_key": "/authors/OL73160A",
+      "from_name": "Fernando Pessoa",
+      "relationship": "hasHeteronym",
+      "to_name": "Alberto Caeiro",
+      "confidence": 1.0,
+      "note": "Principal heteronym — pastoral poet"
+    },
+    {
+      "from_key": "/authors/OL73160A",
+      "from_name": "Fernando Pessoa",
+      "relationship": "hasHeteronym",
+      "to_name": "Ricardo Reis",
+      "confidence": 1.0,
+      "note": "Principal heteronym — classicist poet"
+    },
+    {
+      "from_key": "/authors/OL73160A",
+      "from_name": "Fernando Pessoa",
+      "relationship": "hasHeteronym",
+      "to_name": "Álvaro de Campos",
+      "confidence": 1.0,
+      "note": "Principal heteronym — modernist poet"
+    },
+    {
+      "from_key": "/authors/OL73160A",
+      "from_name": "Fernando Pessoa",
+      "relationship": "hasSemiHeteronym",
+      "to_name": "Bernardo Soares",
+      "confidence": 1.0,
+      "note": "Semi-heteronym — author of The Book of Disquiet"
+    },
+    {
+      "from_key": "/authors/OL3105889A",
+      "from_name": "Elena Ferrante",
+      "relationship": "hasDisputedIdentity",
+      "to_name": "Anita Raja",
+      "confidence": 0.65,
+      "note": "Financial records and editorial position at Edizioni E/O"
+    },
+    {
+      "from_key": "/authors/OL3105889A",
+      "from_name": "Elena Ferrante",
+      "relationship": "hasDisputedIdentity",
+      "to_name": "Domenico Starnone",
+      "confidence": 0.55,
+      "note": "Stylometric analysis by Universities of Padua and Rome"
+    }
+  ]
+}
