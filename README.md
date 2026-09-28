@@ -35,11 +35,11 @@ You should see:
 
 Loading authors... done (n records)
 Loading works... done (n records)
-Service ready at http://localhost:5000/reconcile
+Service ready at http://localhost:5001/reconcile
 Using with OpenRefine
 Open OpenRefine with a spreadsheet containing a column of author names or book titles
 Click the column menu → Reconcile → Start reconciling
-Click Add Standard Service and enter: http://localhost:5000/reconcile
+Click Add Standard Service and enter: http://localhost:5001/reconcile
 Select Author or Work as the type and click Start Reconciling
 File structure
 project/
@@ -68,18 +68,18 @@ Or test the live service directly:
 
 bash
 # Check the manifest
-curl http://localhost:5000/reconcile
+curl http://localhost:5001/reconcile
 
 # Test an author query
-curl -X POST http://localhost:5000/reconcile \
+curl -X POST http://localhost:5001/reconcile \
   -d 'queries={"q0":{"query":"george eliot","type":"Person"}}'
 
 # Test with a pen name
-curl -X POST http://localhost:5000/reconcile \
+curl -X POST http://localhost:5001/reconcile \
   -d 'queries={"q0":{"query":"mary ann evans","type":"Person"}}'
 
 # Test a book query
-curl -X POST http://localhost:5000/reconcile \
+curl -X POST http://localhost:5001/reconcile \
   -d 'queries={"q0":{"query":"middlemarch","type":"Book"}}'
 Known limitations
 No preview API or data extension API
